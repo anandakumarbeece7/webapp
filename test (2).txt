@@ -1,0 +1,1562 @@
+/////////////////////////////////////Query/////////////////////////////////
+create database company
+
+use company
+
+create Table department(
+id int IDENTITY(1,1) NOT NUll,
+department_name varchar(50),
+PRIMARY KEY(id)
+);
+
+create Table employee(
+id int IDENTITY(1,1)NOT NUll,
+employee_name varchar(50),
+email_id varchar(50),
+department_id int references department(id),
+date_of_birth date NOT NUll,
+employee_photo varchar(50),
+salary money,
+gender varchar(50),
+employee_status bit,
+detection decimal(16,2)
+PRIMARY KEY(id)
+);
+////////////////////////////////////Model//////////////////////////////////
+..................................department...............................
+public class DeparmentModel
+    {
+        public int id { get; set; }
+        [Required(ErrorMessage = "Department name is required")]
+        public string department_name { get; set; }
+    }
+..................................employee...............................
+public class EmployeeModel
+    {
+        public int id { get; set; }
+        [Required]
+        public string employee_name { get; set; }
+          [Required]
+        public string email_id { get; set; }
+          [Required]
+        public Nullable<int> department_id { get; set; }
+        public string department_name { get; set; }
+          [Required]
+        public DateTime date_of_birth { get; set; }
+        public string employee_photo { get; set; }
+          [Required]
+        public Nullable<decimal> salary { get; set; }
+          [Required]
+        public string gender { get; set; }
+          [Required]
+        public Nullable<bool> employee_status { get; set; }
+          [Required]
+        public Nullable<decimal> detection { get; set; }
+        public string dob { get; set; }
+    }
+..................................Error...............................
+public class ErrorModel
+    {
+        public string Error_Message { get; set; }
+    }
+
+////////////////////////////////////Services//////////////////////////////////
+..................................department...............................
+public class DepartmentServices
+    {
+        companyEntities db = new companyEntities();
+        public void addDepartment(DeparmentModel deparment)
+        {
+            department objDepartment = new department()
+            {
+                department_name = deparment.department_name,
+            };
+            db.departments.Add(objDepartment);
+            db.SaveChanges();
+        }
+
+        public IList<DeparmentModel> getDepartmentList()
+        {
+            var list = (from a in db.departments
+                        select new
+                        {
+                            id = a.id,
+                            department_name = a.department_name,
+                        }).ToList().Select(a => new DeparmentModel
+                        {
+                            id = a.id,
+                            department_name = a.department_name,
+
+                        }).ToList(); ;
+            return list;
+        }
+        public DeparmentModel editDepartment(int id)
+        {
+            var data = db.departments.Where(val => val.id == id).Select(a => new DeparmentModel()
+            {
+                id = a.id,
+                department_name = a.department_name,
+
+            }).FirstOrDefault();
+            return data;
+        }
+
+        public void UpdateDepartment(int id, DeparmentModel department)
+        {
+            var update = db.departments.Where(val => val.id == id).FirstOrDefault();
+
+            if (update != null)
+            {
+                update.department_name = department.department_name;
+                db.SaveChanges();
+            }
+        }
+
+        public void deleteDepartment(int id)
+        {
+            var data = db.departments.Where(val => val.id == id).FirstOrDefault();
+            db.departments.Remove(data);
+            db.SaveChanges();
+        }
+    }
+    ..................................employee...............................
+     public class EmployeeServices
+    {
+        companyEntities db = new companyEntities();
+
+        public void addEmployee(EmployeeModel employee)
+        {
+            employee objEmployee = new employee()
+            {
+                employee_name = employee.employee_name,
+                email_id = employee.email_id,
+                department_id = employee.department_id,
+                date_of_birth = employee.date_of_birth,
+                employee_photo = employee.employee_photo,
+                salary = employee.salary,
+                gender = employee.gender,
+                employee_status = employee.employee_status,
+                detection = employee.detection,
+            };
+            db.employees.Add(objEmployee);
+            db.SaveChanges();
+        }
+
+        public IList<EmployeeModel> getEmployeeList()
+        {
+            var list = (from a in db.employees
+                        from b in db.departments
+                        where a.department_id==b.id
+                        select new
+                        {
+                            id = a.id,
+                            employee_name = a.employee_name,
+                            department_id = a.department_id,
+                            date_of_birth = a.date_of_birth,
+                            employee_photo = a.employee_photo,
+                            salary = a.salary,
+                            gender = a.gender,
+                            email_id = a.email_id,
+                            department_name = b.department_name,
+                            employee_status = a.employee_status,
+                            detection = a.detection,
+
+                        }).ToList().Select(a => new EmployeeModel
+                        {
+                            id = a.id,
+                            employee_name = a.employee_name,
+                            department_id = a.department_id,
+                            dob = a.date_of_birth.ToString("dd-MM-yyyy"),
+                            employee_photo = a.employee_photo,
+                            email_id = a.email_id,
+                            department_name = a.department_name,
+                            salary = a.salary,
+                            gender = a.gender,
+                            employee_status = a.employee_status,
+                            detection = a.detection,
+
+                        }).ToList(); ;
+            return list;
+        }
+        public EmployeeModel editEmployee(int id)
+        {
+            var data = db.employees.Where(val => val.id == id).Select(a => new EmployeeModel()
+            {
+                id = a.id,
+                employee_name = a.employee_name,
+                email_id = a.email_id,
+                department_id = a.department_id,
+                date_of_birth = a.date_of_birth,
+                employee_photo = a.employee_photo,
+                salary = a.salary,
+                gender = a.gender,
+                employee_status = a.employee_status,
+                detection = a.detection,
+
+            }).FirstOrDefault();
+            return data;
+        }
+
+        public void UpdateEmployee(EmployeeModel employee)
+        {
+            var update = db.employees.Where(val => val.id == employee.id).FirstOrDefault();
+
+            if (update != null)
+            {
+                update.employee_name = employee.employee_name;
+                update.email_id = employee.email_id;
+                update.department_id = employee.department_id;
+                update.date_of_birth = employee.date_of_birth;
+                update.salary = employee.salary;
+                update.gender = employee.gender;
+                update.employee_status = employee.employee_status;
+                update.detection = employee.detection;
+                db.SaveChanges();
+            }
+        }
+
+        public void deleteEmployee(int id)
+        {
+            var data = db.employees.Where(val => val.id == id).FirstOrDefault();
+            db.employees.Remove(data);
+            db.SaveChanges();
+        }
+    }
+
+    ////////////////////////////////////Controller//////////////////////////////////
+    public class HomeController : Controller
+    {
+        DepartmentServices obj_DepartmentServices = new DepartmentServices();
+        EmployeeServices obj_EmployeeServices = new EmployeeServices();
+
+        public ActionResult Department()
+        {
+            return View();
+        }
+
+        public ActionResult Employee()
+        {
+            return View();
+        }
+
+        public ActionResult WebApi()
+        {
+            return View();
+        }
+
+
+
+        public ActionResult add_department(DeparmentModel model)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    obj_DepartmentServices.addDepartment(model);
+                    string Message = "Department Add Succesfully";
+                    string status = "Success";
+                    return Json(new { Message = Message, status = status }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    List<ErrorModel> Err_List = new List<ErrorModel>();
+                    string status = "Error";
+                    foreach (var obj in ModelState.Values)
+                    {
+                        foreach (var error in obj.Errors)
+                        {
+                            if (!string.IsNullOrEmpty(error.ErrorMessage))
+                            {
+                                ErrorModel Err = new ErrorModel();
+                                Err.Error_Message = error.ErrorMessage;
+                                Err_List.Add(Err);
+                            }
+                        }
+
+                    }
+                    return Json(new { status = status, ex = Err_List });
+                }
+
+            }
+            catch (Exception e)
+            {
+
+                string Message = e.Message.ToString();
+                string status = "Exp_Error";
+                return Json(new { Exp_Message = Message, status = status }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public JsonResult get_department(int page, int limit)
+        {
+            try
+            {
+
+
+                int pageIndex = Convert.ToInt32(page) - 1;
+                int pageSize = limit;
+
+                IList<DeparmentModel> Deparment_Details = new List<DeparmentModel>();
+
+                Deparment_Details = obj_DepartmentServices.getDepartmentList();
+
+                int totalRecords = Deparment_Details.Count();
+                var totalPages = (int)Math.Ceiling((float)totalRecords / (float)limit);
+                Deparment_Details = Deparment_Details.Skip(pageIndex * pageSize).Take(pageSize).ToList();
+
+                var jsonData = new
+                {
+                    total = totalPages,
+                    page,
+                    records = totalRecords,
+                    rows = Deparment_Details
+                };
+                return Json(jsonData, JsonRequestBehavior.AllowGet);
+
+            }
+            catch (Exception e)
+            {
+
+                string Message = e.Message.ToString();
+                string status = "Exp_Error";
+                return Json(new { Exp_Message = Message, status = status }, JsonRequestBehavior.AllowGet);
+            }
+        }
+        public JsonResult get_department_list()
+        {
+            try
+            {
+
+                IList<DeparmentModel> Deparment_Details = new List<DeparmentModel>();
+                Deparment_Details = obj_DepartmentServices.getDepartmentList();
+                return Json(new { Deparment_Details = Deparment_Details }, JsonRequestBehavior.AllowGet);
+
+            }
+            catch (Exception e)
+            {
+
+                string Message = e.Message.ToString();
+                string status = "Exp_Error";
+                return Json(new { Exp_Message = Message, status = status }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public ActionResult edit_department(int id)
+        {
+            try
+            {
+
+
+                var Department_Data = obj_DepartmentServices.editDepartment(id);
+                if (Department_Data != null)
+                {
+                    string status = "Success";
+                    return Json(new { Department_Data = Department_Data, status = status }, JsonRequestBehavior.AllowGet);
+                }
+
+                else
+                {
+                    string status = "Error";
+                    return Json(new { status = status }, JsonRequestBehavior.AllowGet);
+                }
+
+            }
+            catch (Exception e)
+            {
+                string Message = e.Message.ToString();
+                string status = "Exp_Error";
+                return Json(new { Exp_Message = Message, status = status }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public ActionResult delete_department(int id)
+        {
+            try
+            {
+
+                obj_DepartmentServices.deleteDepartment(id);
+                string Message = "Department Deleted Succesfully";
+                string status = "Success";
+                return Json(new { Message = Message, status = status }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception e)
+            {
+                string Message = e.Message.ToString();
+                string status = "Exp_Error";
+                return Json(new { Exp_Message = Message, status = status }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public ActionResult update_department(DeparmentModel model)
+        {
+            try
+            {
+
+                if (ModelState.IsValid)
+                {
+                    obj_DepartmentServices.UpdateDepartment(model.id, model);
+                    string Message = "Department Updated Succesfully";
+                    string status = "Success";
+                    return Json(new { Message = Message, status = status }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    List<ErrorModel> Err_List = new List<ErrorModel>();
+                    string status = "Error";
+                    foreach (var obj in ModelState.Values)
+                    {
+                        foreach (var error in obj.Errors)
+                        {
+                            if (!string.IsNullOrEmpty(error.ErrorMessage))
+                            {
+                                ErrorModel Err = new ErrorModel();
+                                Err.Error_Message = error.ErrorMessage;
+                                Err_List.Add(Err);
+                            }
+                        }
+
+                    }
+                    return Json(new { status = status, ex = Err_List });
+                }
+
+            }
+            catch (Exception e)
+            {
+                string Message = e.Message.ToString();
+                string status = "Exp_Error";
+                return Json(new { Exp_Message = Message, status = status }, JsonRequestBehavior.AllowGet);
+            }
+        }
+        [HttpPost]
+        public ActionResult add_employee()
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    EmployeeModel emp = new EmployeeModel();
+                    string photo = "";
+
+                    if (Request.Files.Count > 0)
+                    {
+                        var docfiles = new List<string>();
+                        foreach (string file in Request.Files)
+                        {
+                            Random rnd = new Random();
+                            int card = rnd.Next(52);
+                            var postedFile = Request.Files["employee_photo"];
+                            string myFilePath = postedFile.FileName;
+                            string ext = Path.GetExtension(myFilePath);
+                            string remove = Path.GetFileNameWithoutExtension(myFilePath);
+                            var filePath = HttpContext.Server.MapPath("~/Images/" + remove + card + ext);
+                            photo = postedFile.FileName;
+                            postedFile.SaveAs(filePath);
+                            docfiles.Add(filePath);
+                        }
+                    }
+
+
+
+                    emp.employee_name = Request.Form["employee_name"];
+                    emp.email_id = Request.Form["email_id"];
+                    emp.department_id = Convert.ToInt32(Request.Form["department_id"]);
+
+                    emp.date_of_birth = Convert.ToDateTime(Request.Form["date_of_birth"]);
+                    emp.employee_photo = photo;
+                    emp.employee_status = Convert.ToBoolean(Request.Form["employee_status"]);
+
+                    emp.salary = Convert.ToDecimal(Request.Form["salary"]);
+                    emp.gender = Request.Form["gender"];
+                    emp.detection = Convert.ToDecimal(Request.Form["detection"]);
+
+                    //var httpRequest = HttpContext.Request;
+                    //NameValueCollection form = httpRequest.Form;
+                    //if (httpRequest.Files.Count > 0)
+                    //{
+                    //    var docfiles = new List<string>();
+                    //    foreach (string file in httpRequest.Files)
+                    //    {
+                    //        Random rnd = new Random();
+                    //        int card = rnd.Next(52);
+                    //        var postedFile = httpRequest.Files[file];
+                    //        string myFilePath = postedFile.FileName;
+                    //        string ext = Path.GetExtension(myFilePath);
+                    //        string remove = Path.GetFileNameWithoutExtension(myFilePath);
+                    //        var filePath = HttpContext.Server.MapPath("~/Images/" + remove + card + ext);
+                    //        photo = postedFile.FileName;
+                    //        postedFile.SaveAs(filePath);
+                    //        docfiles.Add(filePath);
+                    //    }
+                    //}
+
+                    //emp.employee_name = form.Get("employee_name");
+                    //emp.email_id = form.Get("email_id");
+                    //emp.department_id = Convert.ToInt32(form.Get("department_id")); 
+
+                    //emp.date_of_birth = Convert.ToDateTime(form.Get("date_of_birth"));
+                    //emp.employee_photo = photo;
+                    //emp.employee_status = Convert.ToBoolean(form.Get("employee_status"));
+
+                    //emp.salary = Convert.ToDecimal(form.Get("salary"));
+                    //emp.gender = form.Get("gender");
+                    //emp.detection = Convert.ToDecimal(form.Get("detection"));
+
+                    obj_EmployeeServices.addEmployee(emp);
+                    string Message = "Employee Add Succesfully";
+                    string status = "Success";
+                    return Json(new { Message = Message, status = status }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    List<ErrorModel> Err_List = new List<ErrorModel>();
+                    string status = "Error";
+                    foreach (var obj in ModelState.Values)
+                    {
+                        foreach (var error in obj.Errors)
+                        {
+                            if (!string.IsNullOrEmpty(error.ErrorMessage))
+                            {
+                                ErrorModel Err = new ErrorModel();
+                                Err.Error_Message = error.ErrorMessage;
+                                Err_List.Add(Err);
+                            }
+                        }
+
+                    }
+                    return Json(new { status = status, ex = Err_List });
+                }
+
+            }
+            catch (Exception e)
+            {
+
+                string Message = e.Message.ToString();
+                string status = "Exp_Error";
+                return Json(new { Exp_Message = Message, status = status }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public ActionResult update_employee()
+        {
+            try
+            {
+
+                if (ModelState.IsValid)
+                {
+                    EmployeeModel emp = new EmployeeModel();
+                    string photo = "";
+
+                    if (Request.Files.Count > 0)
+                    {
+                        var docfiles = new List<string>();
+                        foreach (string file in Request.Files)
+                        {
+                            Random rnd = new Random();
+                            int card = rnd.Next(52);
+                            var postedFile = Request.Files["employee_photo"];
+                            string myFilePath = postedFile.FileName;
+                            string ext = Path.GetExtension(myFilePath);
+                            string remove = Path.GetFileNameWithoutExtension(myFilePath);
+                            var filePath = HttpContext.Server.MapPath("~/Images/" + remove + card + ext);
+                            photo = postedFile.FileName;
+                            postedFile.SaveAs(filePath);
+                            docfiles.Add(filePath);
+                        }
+                    }
+
+
+                    emp.id = Convert.ToInt32(Request.Form["id"]);
+                    emp.employee_name = Request.Form["employee_name"];
+                    emp.email_id = Request.Form["email_id"];
+                    emp.department_id = Convert.ToInt32(Request.Form["department_id"]);
+
+                    emp.date_of_birth = Convert.ToDateTime(Request.Form["date_of_birth"]);
+                    emp.employee_photo = photo;
+                    emp.employee_status = Convert.ToBoolean(Request.Form["employee_status"]);
+
+                    emp.salary = Convert.ToDecimal(Request.Form["salary"]);
+                    emp.gender = Request.Form["gender"];
+                    emp.detection = Convert.ToDecimal(Request.Form["detection"]);
+
+                    obj_EmployeeServices.UpdateEmployee(emp);
+                    string Message = "Employee Updated Succesfully";
+                    string status = "Success";
+                    return Json(new { Message = Message, status = status }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    List<ErrorModel> Err_List = new List<ErrorModel>();
+                    string status = "Error";
+                    foreach (var obj in ModelState.Values)
+                    {
+                        foreach (var error in obj.Errors)
+                        {
+                            if (!string.IsNullOrEmpty(error.ErrorMessage))
+                            {
+                                ErrorModel Err = new ErrorModel();
+                                Err.Error_Message = error.ErrorMessage;
+                                Err_List.Add(Err);
+                            }
+                        }
+
+                    }
+                    return Json(new { status = status, ex = Err_List });
+                }
+
+            }
+            catch (Exception e)
+            {
+                string Message = e.Message.ToString();
+                string status = "Exp_Error";
+                return Json(new { Exp_Message = Message, status = status }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+
+        public JsonResult get_employee(int page, int limit)
+        {
+            try
+            {
+
+
+                int pageIndex = Convert.ToInt32(page) - 1;
+                int pageSize = limit;
+
+                IList<EmployeeModel> Employee_Details = new List<EmployeeModel>();
+
+                Employee_Details = obj_EmployeeServices.getEmployeeList();
+
+                int totalRecords = Employee_Details.Count();
+                var totalPages = (int)Math.Ceiling((float)totalRecords / (float)limit);
+                Employee_Details = Employee_Details.Skip(pageIndex * pageSize).Take(pageSize).ToList();
+
+                var jsonData = new
+                {
+                    total = totalPages,
+                    page,
+                    records = totalRecords,
+                    rows = Employee_Details
+                };
+                return Json(jsonData, JsonRequestBehavior.AllowGet);
+
+            }
+            catch (Exception e)
+            {
+                string Message = e.Message.ToString();
+                string status = "Exp_Error";
+                return Json(new { Exp_Message = Message, status = status }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public ActionResult edit_employee(int id)
+        {
+            try
+            {
+                EmployeeModel Em =new EmployeeModel();
+                Em = obj_EmployeeServices.editEmployee(id);
+                if (Em != null)
+                {
+                    Em.dob=Em.date_of_birth.ToString("dd/MM/yyyy");
+                    string status = "Success";
+                    return Json(new { Employee_Data = Em, status = status }, JsonRequestBehavior.AllowGet);
+                }
+
+                else
+                {
+                    string status = "Error";
+                    return Json(new { status = status }, JsonRequestBehavior.AllowGet);
+                }
+
+            }
+            catch (Exception e)
+            {
+                string Message = e.Message.ToString();
+                string status = "Exp_Error";
+                return Json(new { Exp_Message = Message, status = status }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public ActionResult delete_employee(int id)
+        {
+            try
+            {
+
+                obj_EmployeeServices.deleteEmployee(id);
+                string Message = "Employee Deleted Succesfully";
+                string status = "Success";
+                return Json(new { Message = Message, status = status }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception e)
+            {
+                string Message = e.Message.ToString();
+                string status = "Exp_Error";
+                return Json(new { Exp_Message = Message, status = status }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+
+
+    }
+    ////////////////////////////////////MasterLayout//////////////////////////////////
+    <body ng-app="myApp" >
+    <div class="navbar navbar-inverse navbar-fixed-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                </div>
+                <div class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav">
+                        <li>@Html.ActionLink("Department", "Department", "Home", new { area = "" }, null)</li>
+                        <li>@Html.ActionLink("Employee", "Employee", "Home", new { area = "" }, null)</li>
+                        <li>@Html.ActionLink("WebApi", "WebApi", "Home", new { area = "" }, null)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    <div class="container body-content panel_top">
+        @RenderBody()
+    </div>
+
+
+    @Scripts.Render("~/bundles/jquery")
+    <script src="~/js/angular.min.js"></script>
+    <script src="~/js/angularUtils-pagination/dirPagination.js"></script>
+    <script src="~/js/app.js"></script>
+    <script src="~/js/Service.js"></script>
+    @RenderSection("scripts", required: false)
+</body>
+////////////////////////////////////app.js//////////////////////////////////
+var app = angular.module("myApp", ['angularUtils.directives.dirPagination']);
+var api_url = 'http://localhost:49978/';
+////////////////////////////////////services //////////////////////////////////
+app.factory('api_Service', function ($http) {
+    return {
+        get_list: function (url) {
+            console.log(url);
+            return $http.get(api_url+url).then(function (data) {
+                return data.data;
+            });
+        },
+        post_list: function (url, obj) {
+            console.log(url);
+            return $http.post(api_url+url, obj).then(function (data) {
+                return data.data;
+            });
+        },
+       
+        
+
+    }
+});
+
+app.config(['$qProvider', function ($qProvider) {
+    $qProvider.errorOnUnhandledRejections(false);
+}]);
+////////////////////////////////////Particel  JsonError.cshtml //////////////////////////////////
+<div class="alert alert-success" ng-show="success">
+    <strong>Success!</strong>
+    <ul class="list-group">
+        <li ng-bind="success"></li>
+    </ul>
+</div>
+
+<div class="alert alert-danger" ng-show="error">
+    <strong>Alert!</strong>
+    <ul class="list-group" ng-repeat="Err in error_Message">
+
+        <li>{{Err.Error_Message}}</li>
+    </ul>
+</div>
+<div class="alert alert-danger" ng-show="Excp_error">
+    <strong>Alert!</strong>
+    <ul class="list-group">
+        <li ng-bind="Excp_error"></li>
+    </ul>
+</div>
+////////////////////////////////////Department view//////////////////////////////////
+@{
+    ViewBag.Title = "Department";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<section ng-controller="CreateDepartment" ng-init="GetDepartments(1)">
+    <div class="row">
+
+        <div class="col-md-8">
+            <div class="panel panel-default ">
+                <div class="panel-heading text-center "><b>Manage Departments</b></div>
+                <div class="panel-body">
+                    <div class="dataTables_length" align="left">
+                        <label>
+                            Show <select ng-model="limit" ng-options="x for x in limits"></select> Entries
+                        </label>
+                    </div>
+                    <div class="form-inline pull-right search_1">
+                        <label>Search</label>
+                        <input type="text" ng-model="search" class="form-control srch" placeholder="Search" />
+                    </div>
+
+
+                    <div class="tab_1">
+                        <table class="table table-bordered text-center">
+                            <thead>
+                                <tr class="pointer">
+                                    <th class="text-center">
+                                        S.No
+                                        @*<span class="glyphicon sort-icon" ng-class="{'fa fa-sort-asc':reverse,'fa fa-sort-desc':!reverse}"></span>*@
+                                    </th>
+                                    <th class="text-center" ng-click="sort('department_name')">
+                                        Department Name
+                                        <span class="glyphicon sort-icon" ng-class="{'fa fa-sort-asc':reverse,'fa fa-sort-desc':!reverse}"></span>
+                                    </th>
+                                    <th>Action</th>
+                                </tr>
+
+                            </thead>
+                            <tbody>
+                                <tr dir-paginate="department in DepartmentDetails.rows | orderBy:sortKey:reverse| filter:search | itemsPerPage:limit" current-page="DepartmentDetails.page" total-items="DepartmentDetails.records" pagination-id="no_of_data">
+                                    <td>
+                                        {{$index+1 | number}}
+                                    </td>
+
+                                    <td>
+                                        {{department.department_name}}
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-default" ng-click="EditForm(department)"><i class="fa fa-pencil" aria-hidden="true"></i>Edit</button>
+                                            <button type="button" class="btn btn-default" ng-click="DeleteForm(department.id)"><i class="fa fa-trash" aria-hidden="true">Delete</i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+
+                    </div>
+
+
+                    <div class="text-center">
+                        <span ng-if="no_of_data.data.length ==0">No records found</span>
+                        <dir-pagination-controls pagination-id="no_of_data" on-page-change="GetDepartments(newPageNumber)">
+                        </dir-pagination-controls>
+                    </div>
+
+
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="panel panel-default ">
+                <div class="panel-heading text-center"><b>Add Departments</b></div>
+                <div class="panel-body">
+                    @Html.Partial("~/Views/Shared/JsonError.cshtml")
+                    <form role="form" id="Form" name="Form" ng-submit="SubmitForm(data)">
+
+                        <div class="form-group" ng-class="{ 'has-error' : Form.department_name.$invalid && !Form.department_name.$pristine, 'has-success': Form.department_name.$valid  }">
+                            <label class="control-label">Department Name</label>
+                            <input class="form-control" id="department_name" name="department_name" ng-model="data.department_name" ng-pattern="/^[a-zA-Z\s]*$/" placeholder="Enter Department" required>
+                            <p ng-show=" Form.department_name.$dirty && Form.department_name.$invalid  && Form.department_name.$error.required" class="help-block">Department Name is required.</p>
+                            <p ng-show="Form.department_name.$dirty && Form.department_name.$error.pattern" class=" help-block">Numbers not allowed</p>
+                            <input type="hidden" name="client_id" id="client_id" ng-model="data.id">
+                        </div>
+
+                        <div class="form-group">
+                            <input type="submit" ng-show="sub_btn" ng-disabled="Form.$invalid" class="btn btn-success buttton_a" value="Add">
+                            <input type="submit" ng-show="upd_btn" ng-disabled="Form.$invalid" class="btn btn-success buttton_a" value="Update">
+                            <input type="button" class="btn btn-danger buttton_b" value="Cancel" ng-click="cancelForm()">
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
+
+
+    </div>
+</section>
+
+@section scripts {
+    <script type="text/javascript">
+
+        app.controller("CreateDepartment", ['$scope', '$http', 'api_Service', function ($scope, $http, api_Service) {
+
+            $scope.sub_btn = true;
+            $scope.upd_btn = false;
+            $scope.error = false;
+            $scope.Excp_error = false;
+            $scope.success = false;
+            var error_Message = [];
+
+            $scope.limit = 5;
+            $scope.limits = [5, 10, 25, 50, 100];
+            $scope.page_number = 1;
+
+            $scope.GetDepartments = function (page_no) {
+                data = {};
+                data.page = page_no;
+                $scope.page_number = page_no;
+                data.limit = $scope.limit;
+
+                api_Service.post_list('Home/get_department', data).then(function (result) {
+                    console.log(result);
+                    $scope.DepartmentDetails = result;
+                });
+
+            };
+
+            $scope.SubmitForm = function (Data) {
+                console.log(Data);
+                var Id = Data.id;
+                if (Id == null) {
+                    api_Service.post_list('Home/add_department', Data).then(function (result) {
+                        if (result.status == 'Success') {
+                            $scope.error = false;
+                            $scope.Excp_error = false;
+                            $scope.success = true;
+                            $scope.success = result.Message;
+                            $scope.data = $scope.initial;
+                            $scope.Form.$setPristine(); // set it to as user has not interacted with the form.
+                            $scope.GetDepartments(1);
+                        }
+                        else if (result.status == 'Error') {
+                            $scope.success = false;
+                            $scope.error = true;
+                            $scope.error_Message = result.ex;
+                        }
+                        else {
+                            $scope.success = false;
+                            $scope.error = false;
+                            $scope.Excp_error = true;
+                            $scope.Excp_error = result.Exp_Message;
+                        }
+                    });
+                }
+                else {
+                    api_Service.post_list('Home/update_department', Data).then(function (result) {
+
+                        if (result.status == 'Success') {
+                            // alert(result.Message);
+                            $scope.error = false;
+                            $scope.Excp_error = false;
+                            $scope.success = true;
+                            $scope.success = result.Message;
+                            $scope.data = $scope.initial;
+                            $scope.Form.$setPristine(); // set it to as user has not interacted with the form.
+                            // $scope.GrpData = ''; // initialize the form to empty object
+                            // $scope.Grp_Form.$setPristine(); // set it to as user has not interacted with the form.
+                            $scope.sub_btn = true;
+                            $scope.upd_btn = false;
+                            $scope.GetDepartments($scope.page_number);
+                        }
+                        else if (result.status == 'Error') {
+                            $scope.success = false;
+                            $scope.error = true;
+                            $scope.error_Message = result.ex;
+                        }
+                        else {
+                            $scope.success = false;
+                            $scope.error = false;
+                            $scope.Excp_error = true;
+                            $scope.Excp_error = result.Exp_Message;
+                        }
+                    });
+                }
+
+            }
+
+            $scope.sort = function (sortKey) {
+                $scope.reverse = ($scope.sortKey === sortKey) ? !$scope.reverse : true;
+                $scope.sortKey = sortKey;
+            };
+
+            $scope.cancelForm = function () {
+                $scope.data = $scope.initial;
+                $scope.Form.$setPristine();
+                $scope.sub_btn = true;
+                $scope.upd_btn = false;
+                $scope.error = false;
+                $scope.Excp_error = false;
+                $scope.success = false;
+                var error_Message = [];
+            }
+
+            $scope.EditForm = function (data) {
+                var Id = data.id;
+                var data = { id: Id };
+
+                api_Service.post_list('Home/edit_department', data).then(function (result) {
+                    if (result.status == 'Success') {
+
+                        $scope.data = result.Department_Data;
+                        $scope.sub_btn = false;
+                        $scope.upd_btn = true;
+                    }
+                    else if (result.status == 'Error') {
+                        $scope.success = false;
+                        $scope.error = false;
+                        $scope.Excp_error = true;
+                        $scope.Excp_error = result.status;
+                    }
+                    else {
+                        $scope.success = false;
+                        $scope.error = false;
+                        $scope.Excp_error = true;
+                        $scope.Excp_error = result.Exp_Message;
+                    }
+                });
+            }
+
+            $scope.DeleteForm = function (id) {
+                var Id = id;
+                var data = { id: Id };
+                api_Service.post_list('Home/delete_department', data).then(function (result) {
+                    if (result.status == 'Success') {
+                        $scope.GetDepartments($scope.page_number);
+                    }
+                    else {
+                        alert("Data Can't be Deleted");
+                    }
+                });
+            }
+        }]);
+    </script>
+}
+
+////////////////////////////////////Employee View //////////////////////////////////
+@{
+    ViewBag.Title = "Employee";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<section ng-controller="CreateEmployee" ng-init="GetEmployee(1)">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default ">
+                <div class="panel-heading text-center"><b>Add Employee</b></div>
+                <div class="panel-body">
+                    @Html.Partial("~/Views/Shared/JsonError.cshtml")
+                    <form role="form" id="Form" name="Form" ng-submit="SubmitForm(data)">
+
+                        <div class="row">
+                            <div class="form-group col-md-3" ng-class="{ 'has-error' : Form.employee_name.$invalid && !Form.employee_name.$pristine, 'has-success': Form.employee_name.$valid  }">
+                                <label class="control-label">Employee Name</label>
+                                <input class="form-control" id="employee_name" name="employee_name" ng-model="data.employee_name" ng-pattern="/^[a-zA-Z\s]*$/" placeholder="Enter Name" required>
+                                <p ng-show=" Form.employee_name.$dirty && Form.employee_name.$invalid  && Form.employee_name.$error.required" class="help-block">Employee Name is required.</p>
+                                <p ng-show="Form.employee_name.$dirty && Form.employee_name.$error.pattern" class=" help-block">Numbers not allowed</p>
+                                <input type="hidden" name="id" id="id" ng-model="data.id">
+                            </div>
+
+                            <div class="form-group col-md-3" ng-class="{ 'has-error' : Form.email_id.$invalid && !Form.email_id.$pristine, 'has-success': Form.email_id.$valid }">
+                                <label class="control-label">Email</label>
+                                <input class="form-control" id="email_id" name="email_id" ng-model="data.email_id" type="email" placeholder="Enter Email" required>
+                                <p ng-show=" Form.email_id.$dirty && Form.email_id.$invalid  && Form.email_id.$error.required" class="help-block">Email is required.</p>
+                                <p ng-show="Form.email_id.$dirty && Form.email_id.$error.email" class=" help-block">Please Enter a Valid Email</p>
+                            </div>
+
+                            <div class="form-group col-md-3" ng-class="{ 'has-error' : Form.department_id.$invalid && !Form.department_id.$pristine }">
+                                <label class="control-label">Department</label>
+                                <select class="form-control" ng-model="data.department_id" id="department_id" name="department_id"
+                                        ng-options="department.id as department.department_name for department in Deparment_List" required>
+                                    <option value="">--Select Department--</option>
+
+                                </select>
+                                <p ng-show=" Form.department_id.$dirty && Form.department_id.$invalid  && Form.department_id.$error.required" class="help-block">Department is required.</p>
+
+                            </div>
+
+                            <div class="form-group col-md-3" ng-class="{ 'has-error' : Form.date_of_birth.$invalid && !Form.date_of_birth.$pristine, 'has-success': Form.date_of_birth.$valid  }">
+                                <label class="control-label">Date Of Birth</label>
+                                <input class="form-control" type="text" id="date_of_birth" name="date_of_birth" ng-model="data.date_of_birth" placeholder="Enter Date of birth" required>
+                                <p ng-show=" Form.date_of_birth.$dirty && Form.date_of_birth.$invalid  && Form.date_of_birth.$error.required" class="help-block">Date of birth is required.</p>
+                            </div>
+                        </div>
+                      
+                        <div class="row">
+                            <div class="form-group col-md-3" ng-class="{ 'has-error' : Form.employee_photo.$invalid && !Form.employee_photo.$pristine, 'has-success': Form.employee_photo.$valid  }">
+                                <label class="control-label">Employee Photo</label>
+                                <input class="form-control" type="file" id="employee_photo" name="employee_photo" ng-model="data.employee_photo" placeholder="Enter Date of birth" onchange="angular.element(this).scope().uploadFile(this.files)">
+                                <p ng-show=" Form.employee_photo.$dirty && Form.employee_photo.$invalid  && Form.employee_photo.$error.required" class="help-block">Date of birth is required.</p>
+                            </div>
+
+
+                            <div class="form-group col-md-3" ng-class="{ 'has-error' : Form.salary.$invalid && !Form.salary.$pristine, 'has-success': Form.salary.$valid  }">
+                                <label class="control-label">Salary</label>
+                                <input class="form-control" id="salary" name="salary" ng-model="data.salary" placeholder="Enter Salary" ng-pattern="/^[0-9]*$/" required>
+                                <p ng-show=" Form.salary.$dirty && Form.salary.$invalid  && Form.salary.$error.required" class="help-block">Salary  is required.</p>
+                                <p ng-show="Form.salary.$dirty && Form.salary.$error.pattern" class=" help-block">alphapets not allowed</p>
+                            </div>
+
+                            <div class="form-group col-md-3" ng-class="{ 'has-error' : Form.gender.$invalid && !Form.gender.$pristine, 'has-success': Form.gender.$valid  }">
+                                <label class="control-label">Gender</label>
+                                <input type="radio" value="Male" ng-model="data.gender">Male
+                                <input type="radio" value="Female" ng-model="data.gender">Female
+                                <p ng-show=" Form.gender.$dirty && Form.gender.$invalid  && Form.gender.$error.required" class="help-block">Gender  is required.</p>
+                            </div>
+
+                            <div class="form-group col-md-3">
+                                <label class="control-label">Employee Status</label>
+                                <input type="checkbox" id="employee_status" name="employee_status" ng-model="data.employee_status" placeholder="Enter Date of birth">
+                            </div>
+
+                            
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-md-3" ng-class="{ 'has-error' : Form.detection.$invalid && !Form.detection.$pristine, 'has-success': Form.detection.$valid  }">
+                                <label class="control-label">Detection</label>
+                                <input class="form-control" id="detection" name="detection" ng-model="data.detection" placeholder="Enter Salary" ng-pattern="/^[0-9]*$/" required>
+                                <p ng-show=" Form.detection.$dirty && Form.detection.$invalid  && Form.detection.$error.required" class="help-block">Detection  is required.</p>
+                                <p ng-show="Form.detection.$dirty && Form.detection.$error.pattern" class=" help-block">alphapets not allowed</p>
+                            </div>
+                        </div>
+
+                        
+
+
+                        <div class="form-group">
+                            <input type="submit" ng-show="sub_btn" ng-disabled="Form.$invalid" class="btn btn-success buttton_a" value="Add">
+                            <input type="submit" ng-show="upd_btn" ng-disabled="Form.$invalid" class="btn btn-success buttton_a" value="Update">
+                            <input type="button" class="btn btn-danger buttton_b" value="Cancel" ng-click="cancelForm()">
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="panel panel-default ">
+                <div class="panel-heading text-center "><b>Manage Employee</b></div>
+                <div class="panel-body">
+                    <div class="dataTables_length" align="left">
+                        <label>
+                            Show <select ng-model="limit" ng-options="x for x in limits"></select> Entries
+                        </label>
+                    </div>
+                    <div class="form-inline pull-right search_1">
+                        <label>Search</label>
+                        <input type="text" ng-model="search" class="form-control srch" placeholder="Search" />
+                    </div>
+                    <div class="tab_1">
+                        <table class="table table-bordered ">
+                            <thead>
+                                <tr class="pointer">
+                                    <th class="text-center">
+                                        S.No
+                                       
+                                    </th>
+                                    <th class="text-center">
+                                        Employee Name
+                                        
+                                    </th>
+                                    <th class="text-center">
+                                        Email Id
+
+                                    </th>
+                                    <th class="text-center">
+                                        Department
+
+                                    </th>
+                                    <th class="text-center">
+                                        Date of Birth
+
+                                    </th>
+                                    <th class="text-center">
+                                        Employee Photo
+
+                                    </th>
+                                    <th class="text-center">
+                                        Salary
+
+                                    </th>
+                                    <th class="text-center">
+                                        Genter
+
+                                    </th>
+                                    <th class="text-center">
+                                        Status
+
+                                    </th>
+                                    <th class="text-center">
+                                        Detection
+
+                                    </th>
+                                    <th>Action</th>
+                                </tr>
+
+                            </thead>
+                            <tbody>
+                                <tr dir-paginate="employee in Employee_Details.rows | orderBy:sortKey:reverse| filter:search | itemsPerPage:limit" current-page="Employee_Details.page" total-items="Employee_Details.records" pagination-id="no_of_data">
+                                    <td>
+                                        {{$index+1 | number}}
+                                    </td>
+                                    <td>
+                                        {{employee.employee_name}}
+                                    </td>
+                                    <td>
+                                        {{employee.email_id}}
+                                    </td>
+                                    <td>
+                                        {{employee.department_name}}
+                                    </td>
+                                    <td>
+                                        {{employee.dob }}
+                                    </td>
+                                    <td>
+                                        {{employee.employee_photo}}
+                                    </td>
+                                    <td>
+                                        {{employee.salary}}
+                                    </td>
+                                    <td>
+                                        {{employee.gender}}
+                                    </td>
+                                    <td>
+                                        {{employee.employee_status}}
+                                    </td>
+                                    <td>
+                                        {{employee.detection}}
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-default" ng-click="EditForm(employee)"><i class="fa fa-pencil" aria-hidden="true"></i>Edit</button>
+                                            <button type="button" class="btn btn-default" ng-click="DeleteForm(employee.id)"><i class="fa fa-trash" aria-hidden="true">Delete</i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+
+                    </div>
+
+
+                    <div class="text-center">
+                        <span ng-if="no_of_data.data.length ==0">No records found</span>
+                        <dir-pagination-controls pagination-id="no_of_data" on-page-change="GetDepartments(newPageNumber)">
+                        </dir-pagination-controls>
+                    </div>
+
+
+
+                </div>
+            </div>
+        </div>
+
+       
+
+
+
+
+    </div>
+</section>
+
+@section scripts {
+    <script type="text/javascript">
+
+        app.controller("CreateEmployee", ['$scope', '$http', 'api_Service', function ($scope, $http, api_Service) {
+
+            $scope.sub_btn = true;
+            $scope.upd_btn = false;
+            $scope.error = false;
+            $scope.Excp_error = false;
+            $scope.success = false;
+            var error_Message = [];
+
+            $scope.limit = 5;
+            $scope.limits = [5, 10, 25, 50, 100];
+            $scope.page_number = 1;
+            $scope.uploadFile = function (files) {              
+                $scope.Photo = files[0];            
+            };
+            $scope.GetEmployee = function (page_no) {
+                data = {};
+                data.page = page_no;
+                $scope.page_number = page_no;
+                data.limit = $scope.limit;
+
+                api_Service.post_list('Home/get_employee', data).then(function (result) {
+                    console.log(result);
+                    $scope.Employee_Details = result;
+                });
+
+                api_Service.get_list('Home/get_department_list').then(function (result) {
+                    console.log(result.Client_Details);
+                    $scope.Deparment_List = result.Deparment_Details;
+
+                });
+
+            };
+
+            $scope.SubmitForm = function (Data) {
+                console.log(Data);
+                var Id = Data.id;
+                if (Id == null) {
+
+                    var payload = new FormData();
+                    payload.append("employee_name", Data.employee_name);
+                    payload.append("email_id", Data.email_id);
+                    payload.append("department_id", Data.department_id);
+
+                    payload.append("date_of_birth", Data.date_of_birth);
+                    payload.append("employee_photo", $scope.Photo);
+                    payload.append("salary", Data.salary);
+
+                    payload.append("gender", Data.gender);
+                    payload.append("employee_status", Data.employee_status);
+                    payload.append("detection", Data.detection);
+
+
+                    $http({
+                        url: "http://localhost:49978/Home/add_employee",
+                        method: 'POST',
+                        data: payload,     
+                        headers: { 'Content-Type': undefined },                         
+                        transformRequest: angular.identity
+                    }).then(function (data) {
+                        if (data.data.status == 'Success') {
+                                $scope.error = false;
+                                $scope.Excp_error = false;
+                                $scope.success = true;
+                                $scope.success = data.data.Message;
+                                $scope.data = $scope.initial;
+                                $scope.Form.$setPristine(); // set it to as user has not interacted with the form.
+                                $scope.GetEmployee(1);
+                            }
+                        else if (data.data.status == 'Error') {
+                                $scope.success = false;
+                                $scope.error = true;
+                                $scope.error_Message = data.data.ex;
+                            }
+                            else {
+                                $scope.success = false;
+                                $scope.error = false;
+                                $scope.Excp_error = true;
+                                $scope.Excp_error = data.data.Exp_Message;
+                            }
+                    });
+
+
+
+
+                }
+                else {
+
+                    var payload = new FormData();
+                    payload.append("id", Data.id);
+                    payload.append("employee_name", Data.employee_name);
+                    payload.append("email_id", Data.email_id);
+                    payload.append("department_id", Data.department_id);
+
+                    payload.append("date_of_birth", Data.date_of_birth);
+                    payload.append("employee_photo", $scope.Photo);
+                    payload.append("salary", Data.salary);
+
+                    payload.append("gender", Data.gender);
+                    payload.append("employee_status", Data.employee_status);
+                    payload.append("detection", Data.detection);
+
+                  
+                }
+                $http({
+                    url: "http://localhost:49978/Home/update_employee",
+                    method: 'POST',
+                    data: payload,
+                    headers: { 'Content-Type': undefined },
+                    transformRequest: angular.identity
+                }).then(function (data) {
+                    console.log(data);
+                    if (data.data.status == 'Success') {
+                        $scope.error = false;
+                        $scope.Excp_error = false;
+                        $scope.success = true;
+                        $scope.success = data.data.Message;
+                        $scope.data = $scope.initial;
+                        $scope.Form.$setPristine(); // set it to as user has not interacted with the form.
+                        $scope.GetEmployee(1);
+                        $scope.sub_btn = true;
+                        $scope.upd_btn = false;
+                       
+                    }
+                    else if (data.data.status == 'Error') {
+                        $scope.success = false;
+                        $scope.error = true;
+                        $scope.error_Message = data.data.ex;
+                    }
+                    else {
+                        $scope.success = false;
+                        $scope.error = false;
+                        $scope.Excp_error = true;
+                        $scope.Excp_error = data.data.Exp_Message;
+                    }
+                });
+            }
+
+            $scope.sort = function (sortKey) {
+                $scope.reverse = ($scope.sortKey === sortKey) ? !$scope.reverse : true;
+                $scope.sortKey = sortKey;
+            };
+
+            $scope.cancelForm = function () {
+                $scope.data = $scope.initial;
+                $scope.Form.$setPristine();
+                $scope.sub_btn = true;
+                $scope.upd_btn = false;
+                $scope.error = false;
+                $scope.Excp_error = false;
+                $scope.success = false;
+                var error_Message = [];
+            }
+
+            $scope.EditForm = function (data) {
+                var Id = data.id;
+                var data = { id: Id };
+
+                api_Service.post_list('Home/edit_employee', data).then(function (result) {
+                    if (result.status == 'Success') {
+
+                        $scope.data = result.Employee_Data;
+                        $scope.data.date_of_birth = result.Employee_Data.dob;
+                        $scope.Photo = result.Employee_Data.employee_photo;
+                        $scope.sub_btn = false;
+                        $scope.upd_btn = true;
+                    }
+                    else if (result.status == 'Error') {
+                        $scope.success = false;
+                        $scope.error = false;
+                        $scope.Excp_error = true;
+                        $scope.Excp_error = result.status;
+                    }
+                    else {
+                        $scope.success = false;
+                        $scope.error = false;
+                        $scope.Excp_error = true;
+                        $scope.Excp_error = result.Exp_Message;
+                    }
+                });
+            }
+
+            $scope.DeleteForm = function (id) {
+                var Id = id;
+                var data = { id: Id };
+                api_Service.post_list('Home/delete_employee', data).then(function (result) {
+                    if (result.status == 'Success') {
+                        $scope.GetDepartments($scope.page_number);
+                    }
+                    else {
+                        alert("Data Can't be Deleted");
+                    }
+                });
+            }
+        }]);
+    </script>
+}
+
+////////////////////////////////////Api //////////////////////////////////
+public class EmployeeController : ApiController
+    {
+        Employee_Services es = new Employee_Services();
+
+        static IList<Employees> Employeelist = new List<Employees>();
+// GET: api/Employee
+        public IList<Employees> Get()
+        {
+
+            Employeelist =es.ViewEmployee();
+            return Employeelist;
+        }
+
+
+
+// GET: api/Employee/5
+        public EmployeeResults Get(int id)
+        {
+            EmployeeResults ans = new EmployeeResults();
+            int Gid = Convert.ToInt32(id);
+            ans.data=es.EditEmployee(Gid);
+
+            return ans;
+        }
+
+
+
+// POST: api/Employee
+        public HttpResponseMessage Post()
+        {
+            
+            
+            if (ModelState.IsValid)
+            {
+                Employees emp = new Employees();
+                string photo = "";
+                var httpRequest = HttpContext.Current.Request;
+                NameValueCollection form = httpRequest.Form;
+                if (httpRequest.Files.Count > 0)
+                {
+                    var docfiles = new List<string>();
+                    foreach (string file in httpRequest.Files)
+                    {
+                        Random rnd = new Random();
+                        int card = rnd.Next(52); 
+                        var postedFile = httpRequest.Files[file];
+                        string myFilePath = postedFile.FileName;
+                        string ext = Path.GetExtension(myFilePath);
+                        string remove = Path.GetFileNameWithoutExtension(myFilePath);
+                       var filePath = HttpContext.Current.Server.MapPath("~/Images/" + remove+card+ext);
+                        photo = postedFile.FileName;
+                        postedFile.SaveAs(filePath);
+                        docfiles.Add(filePath);
+                    }
+                }
+
+               
+                emp.First_name = form.Get("First_name");
+                emp.Last_name = form.Get("Last_name");
+                emp.E_mail = form.Get("E_mail");
+                emp.Phone = form.Get("Phone");
+                emp.Photo = photo;
+                emp.Date_of_birth = Convert.ToDateTime(form.Get("Date_of_birth"));
+                emp.Department_id = Convert.ToInt32(form.Get("Department_id"));
+                emp.Address_line1 = form.Get("Address_line1");
+                emp.Address_line2 = form.Get("Address_line2");
+                emp.State_name = form.Get("State_name");
+                emp.Country = form.Get("Country");
+
+
+                es.AddEmployee(emp);
+                return new HttpResponseMessage(HttpStatusCode.OK);
+            }
+            else
+            {
+                return Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState);
+            }
+        }
+
+       
+// PUT: api/Employee/5
+        public EmployeeResults Put(int id,Employees model)
+        {
+            EmployeeResults ans = new EmployeeResults();
+            int Hid = Convert.ToInt32(id);
+            es.UpdateEmployee(Hid,model);
+            return ans;
+            
+        }
+
+
+// DELETE: api/Employee/5
+        public void Delete(int id)
+        {
+            int Did= Convert.ToInt32(id);
+            es.DeleteEmployee(Did);
+
+        }
+    }
